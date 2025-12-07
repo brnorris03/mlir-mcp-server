@@ -10,7 +10,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from .config import MLIRConfig
-from .tools import parser
+from .tools import generator, parser
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +114,74 @@ def create_server(config: MLIRConfig) -> FastMCP:
         """
         return parser.get_module_info(config, mlir_code)
 
+    # Register MLIR generation tools
+    @mcp.tool()
+    def create_function(
+        name: str,
+        arg_types: list[str],
+        result_types: list[str],
+        add_return: bool = True,
+    ) -> dict[str, Any]:
+        """Generate an MLIR function with specified signature.
+
+        Args:
+            name: Function name.
+            arg_types: List of argument type strings (e.g., ["i32", "i64"]).
+            result_types: List of result type strings.
+            add_return: Whether to add an empty return statement.
+
+        Returns:
+            Dictionary with generated MLIR function code.
+        """
+        return generator.create_function(config, name, arg_types, result_types, add_return)
+
+    @mcp.tool()
+    def create_operation(
+        op_name: str,
+        operands: list[str] | None = None,
+        result_types: list[str] | None = None,
+        attributes: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Generate a specific MLIR operation.
+
+        Args:
+            op_name: Operation name (e.g., "arith.addi").
+            operands: List of operand names.
+            result_types: List of result type strings.
+            attributes: Optional operation attributes.
+
+        Returns:
+            Dictionary with generated operation code.
+        """
+        return generator.create_operation(config, op_name, operands, result_types, attributes)
+
+    @mcp.tool()
+    def generate_from_template(template_name: str, params: dict[str, Any]) -> dict[str, Any]:
+        """Generate MLIR code from a template.
+
+        Args:
+            template_name: Name of the template (e.g., "add_function", "if_else").
+            params: Template parameters (e.g., {"type": "i32", "value": "42"}).
+
+        Returns:
+            Dictionary with generated MLIR code.
+        """
+        return generator.generate_from_template(config, template_name, params)
+
+    @mcp.tool()
+    def list_templates() -> dict[str, Any]:
+        """List available MLIR generation templates.
+
+        Returns:
+            Dictionary with list of templates and their parameters.
+        """
+        return generator.list_templates(config)
+
     logger.info("MLIR MCP Server created successfully")
-    logger.info("Registered tools: ping, toolchain_info, parse_mlir, validate_mlir, get_module_info")
+    logger.info(
+        "Registered tools: ping, toolchain_info, "
+        "parse_mlir, validate_mlir, get_module_info, "
+        "create_function, create_operation, generate_from_template, list_templates"
+    )
 
     return mcp
