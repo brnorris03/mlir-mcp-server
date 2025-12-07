@@ -74,5 +74,3 @@ def get_real_mlir_config() -> MLIRConfig:
         return config
     except RuntimeError:
         pytest.skip("No MLIR installation found")
-
-    raise RuntimeError("Unreachable")

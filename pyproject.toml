@@ -28,7 +28,7 @@ dependencies = [
     "mcp>=1.0.0",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
-    "numpy>=1.19.5",  # Required for MLIR Python bindings
+    "numpy>=1.23.0",  # Required for MLIR Python bindings
 ]
 
 [project.optional-dependencies]

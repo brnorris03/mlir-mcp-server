@@ -10,7 +10,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from .config import MLIRConfig
-from .tools import generator, parser
+from .tools import generator, parser, transformer
 
 logger = logging.getLogger(__name__)
 
@@ -175,11 +175,51 @@ def create_server(config: MLIRConfig) -> FastMCP:
         """
         return generator.list_templates(config)
 
+    # Register MLIR transformation tools
+    @mcp.tool()
+    def apply_pass(mlir_code: str, pass_name: str) -> dict[str, Any]:
+        """Apply a single MLIR pass to code.
+
+        Args:
+            mlir_code: MLIR code as string.
+            pass_name: Name of the pass (e.g., "canonicalize", "cse", "inline").
+
+        Returns:
+            Dictionary with transformed MLIR code or errors.
+        """
+        return transformer.apply_pass(config, mlir_code, pass_name)
+
+    @mcp.tool()
+    def apply_pass_pipeline(mlir_code: str, pipeline: str) -> dict[str, Any]:
+        """Apply a pipeline of MLIR passes.
+
+        Args:
+            mlir_code: MLIR code as string.
+            pipeline: Pass pipeline (e.g., "canonicalize,cse,inline").
+
+        Returns:
+            Dictionary with transformed MLIR code or errors.
+        """
+        return transformer.apply_pass_pipeline(config, mlir_code, pipeline)
+
+    @mcp.tool()
+    def canonicalize(mlir_code: str) -> dict[str, Any]:
+        """Canonicalize MLIR code.
+
+        Args:
+            mlir_code: MLIR code as string.
+
+        Returns:
+            Dictionary with canonicalized MLIR code or errors.
+        """
+        return transformer.canonicalize(config, mlir_code)
+
     logger.info("MLIR MCP Server created successfully")
     logger.info(
         "Registered tools: ping, toolchain_info, "
         "parse_mlir, validate_mlir, get_module_info, "
-        "create_function, create_operation, generate_from_template, list_templates"
+        "create_function, create_operation, generate_from_template, list_templates, "
+        "apply_pass, apply_pass_pipeline, canonicalize"
     )
 
     return mcp

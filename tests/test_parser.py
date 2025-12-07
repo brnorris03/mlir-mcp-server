@@ -80,9 +80,6 @@ def config() -> MLIRConfig:
     except RuntimeError:
         pytest.skip("No MLIR installation found")
 
-    # This line will never be reached due to pytest.skip(), but satisfies type checker
-    raise RuntimeError("Unreachable")
-
 
 @pytest.fixture
 def valid_simple_mlir() -> str:

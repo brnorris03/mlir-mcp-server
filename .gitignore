@@ -40,8 +40,10 @@ ENV/
 # IDE settings
 .vscode/
 
-# Planning documents
+# Planning and development documents
 IMPLEMENTATION_PLAN.md
+docs/phase2_summary.md
+docs/mlir_python_bindings.md
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

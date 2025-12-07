@@ -36,8 +36,8 @@ class TestServerTools:
     """Tests for registered MCP tools."""
 
     @pytest.mark.asyncio
-    async def test_all_nine_tools_registered(self, config: MLIRConfig) -> None:
-        """Test that all 9 MCP tools are registered."""
+    async def test_all_tools_registered(self, config: MLIRConfig) -> None:
+        """Test that all MCP tools are registered."""
         server = create_server(config)
 
         tools = await server.list_tools()
@@ -53,9 +53,12 @@ class TestServerTools:
             "create_operation",
             "generate_from_template",
             "list_templates",
+            "apply_pass",
+            "apply_pass_pipeline",
+            "canonicalize",
         ]
 
         for expected in expected_tools:
             assert expected in tool_names, f"Tool {expected} not registered"
 
-        assert len(tools) == 9
+        assert len(tools) == 12

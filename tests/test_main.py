@@ -1,6 +1,5 @@
 """Tests for __main__.py server entry point."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -78,9 +77,7 @@ class TestMain:
             mock_config = MagicMock()
             mock_config.toolchain_path = toolchain_dir
             # Simulate validation failure
-            mock_config.validate_tools.side_effect = RuntimeError(
-                "Core MLIR tools not found"
-            )
+            mock_config.validate_tools.side_effect = RuntimeError("Core MLIR tools not found")
             mock_config_cls.return_value = mock_config
 
             with pytest.raises(SystemExit) as exc_info:
