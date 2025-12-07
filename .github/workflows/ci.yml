@@ -76,10 +76,17 @@ jobs:
             -DBUILD_SHARED_LIBS=OFF
 
           # Build essential targets only
-          cmake --build build --target mlir-opt mlir-translate MLIRPythonModules
+          cmake --build build
 
           # Install
           cmake --install build
+
+      - name: Run MLIR tests
+        if: steps.cache-mlir.outputs.cache-hit != 'true'
+        run: |
+          source venv/bin/activate
+          cd llvm-project-llvmorg-${{ env.LLVM_VERSION }}
+          cmake --build build --target check-mlir
 
       - name: Verify MLIR installation
         run: |
