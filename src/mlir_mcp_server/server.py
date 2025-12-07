@@ -1,0 +1,120 @@
+"""MLIR MCP Server implementation.
+
+This module implements the MCP server using the FastMCP framework,
+registering tools, resources, and prompts for MLIR manipulation.
+"""
+
+import logging
+from typing import Any
+
+from mcp.server.fastmcp import FastMCP
+
+from .config import MLIRConfig
+from .tools import parser
+
+logger = logging.getLogger(__name__)
+
+
+def create_server(config: MLIRConfig) -> FastMCP:
+    """Create and configure the MLIR MCP server.
+
+    Args:
+        config: MLIR configuration with validated toolchain path.
+
+    Returns:
+        Configured FastMCP server instance.
+    """
+    # Create FastMCP server
+    mcp = FastMCP("mlir-mcp-server")
+
+    # Store config for access in tools
+    mcp.mlir_config = config  # type: ignore
+
+    # Register a simple ping tool for health checking
+    @mcp.tool()
+    def ping() -> dict[str, str]:
+        """Health check endpoint that returns server status.
+
+        Returns:
+            Dictionary with server status and toolchain information.
+        """
+        return {
+            "status": "ok",
+            "server": "mlir-mcp-server",
+            "version": "0.1.0",
+            "toolchain_path": str(config.toolchain_path),
+        }
+
+    # Register a toolchain_info tool
+    @mcp.tool()
+    def toolchain_info() -> dict[str, Any]:
+        """Get information about the configured MLIR toolchain.
+
+        Returns:
+            Dictionary with toolchain path and tool availability.
+        """
+        tool_status = config.validate_tools()
+        return {
+            "toolchain_path": str(config.toolchain_path),
+            "tools": {
+                "mlir_opt": {"path": str(config.mlir_opt), "available": tool_status["mlir_opt"]},
+                "mlir_translate": {
+                    "path": str(config.mlir_translate),
+                    "available": tool_status["mlir_translate"],
+                },
+                "mlir_reduce": {
+                    "path": str(config.mlir_reduce),
+                    "available": tool_status["mlir_reduce"],
+                },
+                "mlir_query": {
+                    "path": str(config.mlir_query),
+                    "available": tool_status["mlir_query"],
+                },
+                "mlir_runner": {
+                    "path": str(config.mlir_runner),
+                    "available": tool_status["mlir_runner"],
+                },
+            },
+        }
+
+    # Register MLIR parsing tools
+    @mcp.tool()
+    def parse_mlir(mlir_code: str) -> dict[str, Any]:
+        """Parse MLIR code and return module information.
+
+        Args:
+            mlir_code: MLIR code as a string.
+
+        Returns:
+            Dictionary with parsing results including operations and any errors.
+        """
+        return parser.parse_mlir(config, mlir_code)
+
+    @mcp.tool()
+    def validate_mlir(mlir_code: str) -> dict[str, Any]:
+        """Validate MLIR code syntax and semantics.
+
+        Args:
+            mlir_code: MLIR code as a string.
+
+        Returns:
+            Dictionary with validation results.
+        """
+        return parser.validate_mlir(config, mlir_code)
+
+    @mcp.tool()
+    def get_module_info(mlir_code: str) -> dict[str, Any]:
+        """Extract detailed structural information from MLIR code.
+
+        Args:
+            mlir_code: MLIR code as a string.
+
+        Returns:
+            Dictionary with detailed module information including operations, regions, and blocks.
+        """
+        return parser.get_module_info(config, mlir_code)
+
+    logger.info("MLIR MCP Server created successfully")
+    logger.info("Registered tools: ping, toolchain_info, parse_mlir, validate_mlir, get_module_info")
+
+    return mcp
