@@ -73,10 +73,12 @@ pip install -e ".[dev]"
 
 ### MLIR Python Bindings Setup
 
-Configure environment to use your MLIR Python bindings:
+**Automatic Setup (Recommended)**: Use the `MLIR_INSTALLATIONS` configuration option (see Configuration section below). The server will automatically configure PYTHONPATH and library paths for you!
+
+**Manual Setup** (if needed):
 
 ```bash
-# Set MLIR Python bindings path (adjust to your installation)
+# Set MLIR Python bindings path
 export PYTHONPATH=/path/to/mlir/python_packages/mlir_core:$PYTHONPATH
 
 # Set library path for MLIR shared libraries
@@ -88,9 +90,9 @@ export LD_LIBRARY_PATH=/path/to/mlir/lib:$LD_LIBRARY_PATH
 set PATH=C:\path\to\mlir\bin;%PATH%
 ```
 
-**Tip**: Edit `run_server.sh` and `run_tests.sh` to match your paths, then use:
-- `./run_server.sh` - Run the server with correct environment
-- `./run_tests.sh` - Run tests with correct environment
+**Helper Scripts**: Use these to run the server/tests:
+- `./run_server.sh` - Run the server
+- `./run_tests.sh` - Run tests
 
 ## Configuration
 
@@ -110,23 +112,65 @@ order):
 If your MLIR toolchain is in one of these locations with `mlir-opt` present, no
 configuration is needed!
 
-### Environment Variable
+### Simple Configuration
 
-If your toolchain is in a different location, set the `MLIR_TOOLCHAIN_PATH`
-environment variable:
+For a single MLIR installation, use `MLIR_TOOLCHAIN_PATH`:
 
 ```bash
-export MLIR_TOOLCHAIN_PATH=/path/to/your/llvm/build/bin
+export MLIR_TOOLCHAIN_PATH=/path/to/llvm/build/bin
 python -m mlir_mcp_server
 ```
 
-### Configuration File
+### Multiple MLIR Installations
 
-Create a `.env` file in your project root:
+For multiple MLIR projects (e.g., main LLVM + custom dialects), use `MLIR_INSTALLATIONS`:
+
+```bash
+# Automatically configures PYTHONPATH, library paths, and tools
+export MLIR_INSTALLATIONS=/opt/llvm-build:/opt/custom-project
+python -m mlir_mcp_server
+```
+
+Each installation root should contain:
+- `bin/` - MLIR tools (mlir-opt, custom-opt, etc.)
+- `lib/` - Shared libraries
+- `python_packages/mlir_core/` - Python bindings
+
+The server automatically:
+- Searches all bin directories for tools
+- Adds all Python bindings to sys.path
+- Sets platform-specific library paths (DYLD_LIBRARY_PATH on macOS, LD_LIBRARY_PATH on Linux)
+
+### Configuration File (.env)
+
+Create a `.env` file in your project root for persistent configuration.
+
+**Option 1: Simple Single Installation**
 
 ```env
-MLIR_TOOLCHAIN_PATH=/path/to/your/llvm/build/bin
+MLIR_TOOLCHAIN_PATH=/path/to/llvm/build/bin
 ```
+
+**Option 2: Multiple MLIR Installations (Recommended)**
+
+Automatically configures tools, Python bindings, and library paths:
+
+```env
+# Colon-separated list of MLIR installation roots
+# Each should have: bin/, lib/, python_packages/mlir_core/
+MLIR_INSTALLATIONS=/path/to/llvm-build:/path/to/custom-mlir-project
+
+# Example with main LLVM + custom "TT" project:
+# MLIR_INSTALLATIONS=/opt/llvm:/opt/tt-mlir
+```
+
+This automatically:
+- Searches both `/opt/llvm/bin` and `/opt/tt-mlir/bin` for tools
+- Adds both Python bindings to PYTHONPATH
+- Adds both lib directories to LD_LIBRARY_PATH/DYLD_LIBRARY_PATH
+- Makes tools like `mlir-opt` and `tt-opt` available
+
+**No manual PYTHONPATH or LD_LIBRARY_PATH setup needed!**
 
 ### Configuration Priority
 

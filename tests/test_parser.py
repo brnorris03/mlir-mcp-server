@@ -4,21 +4,84 @@ from pathlib import Path
 
 import pytest
 
-from mlir_mcp_server.config import MLIRConfig
+from mlir_mcp_server.config import MLIRConfig, MLIRInstallation
 from mlir_mcp_server.tools.parser import get_module_info, parse_mlir, validate_mlir
 
 # Get fixtures directory
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
+# Define test installation configurations using MLIRInstallation
+def get_test_installations() -> list[MLIRInstallation]:
+    """Get test MLIR installation configurations.
+
+    Returns:
+        List of MLIRInstallation objects for testing different tool prefixes.
+    """
+    return [
+        MLIRInstallation(name="llvm", root=Path("/test/llvm"), tool_prefix="mlir"),
+        MLIRInstallation(name="custom", root=Path("/test/custom"), tool_prefix="custom"),
+    ]
+
+
+@pytest.fixture(params=get_test_installations(), ids=lambda x: x.name)
+def installation_config(
+    request: pytest.FixtureRequest, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[MLIRConfig, MLIRInstallation]:
+    """Create test configuration with parameterized MLIR installation.
+
+    This allows testing with different tool prefixes (mlir-opt, custom-opt, etc.).
+    """
+    template_installation: MLIRInstallation = request.param
+
+    # Clear environment to avoid .env interference
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
+
+    # Create installation directory structure in tmp
+    root_dir = tmp_path / template_installation.name
+    root_dir.mkdir()
+
+    # Create actual MLIRInstallation with tmp paths
+    installation = MLIRInstallation(
+        name=template_installation.name,
+        root=root_dir,
+        tool_prefix=template_installation.tool_prefix,
+    )
+
+    # Create bin directory and tools
+    bin_dir = installation.bin_dir
+    assert bin_dir is not None
+    bin_dir.mkdir(parents=True)
+
+    # Create mock core tools using installation's get_tool_path method
+    for tool in ["opt", "translate"]:
+        installation.get_tool_path(tool).touch()
+
+    # Create config with this installation
+    config = MLIRConfig(toolchain_path=str(bin_dir))
+
+    return config, installation
+
+
 @pytest.fixture
-def config(tmp_path: Path) -> MLIRConfig:
-    """Create a test configuration with mock toolchain."""
-    toolchain_dir = tmp_path / "bin"
-    toolchain_dir.mkdir()
-    (toolchain_dir / "mlir-opt").touch()
-    (toolchain_dir / "mlir-translate").touch()
-    return MLIRConfig(toolchain_path=str(toolchain_dir))
+def config() -> MLIRConfig:
+    """Create configuration using real MLIR installation.
+
+    Uses actual mlir-opt and mlir-translate tools from auto-detected or configured installation.
+    """
+    try:
+        # This will use .env or auto-detect real MLIR installation
+        config = MLIRConfig()
+        # Verify core tools exist
+        if not config.mlir_opt.exists() or not config.mlir_translate.exists():
+            pytest.skip("Real MLIR tools (mlir-opt, mlir-translate) not found")
+        return config
+    except RuntimeError:
+        pytest.skip("No MLIR installation found")
+
+    # This line will never be reached due to pytest.skip(), but satisfies type checker
+    raise RuntimeError("Unreachable")
 
 
 @pytest.fixture
