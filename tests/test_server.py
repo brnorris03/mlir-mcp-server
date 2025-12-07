@@ -56,9 +56,12 @@ class TestServerTools:
             "apply_pass",
             "apply_pass_pipeline",
             "canonicalize",
+            "count_operations",
+            "extract_function",
+            "get_operation_operands",
         ]
 
         for expected in expected_tools:
             assert expected in tool_names, f"Tool {expected} not registered"
 
-        assert len(tools) == 12
+        assert len(tools) == 15

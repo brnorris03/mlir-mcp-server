@@ -10,7 +10,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from .config import MLIRConfig
-from .tools import generator, parser, transformer
+from .tools import analyzer, generator, parser, transformer
 
 logger = logging.getLogger(__name__)
 
@@ -214,12 +214,54 @@ def create_server(config: MLIRConfig) -> FastMCP:
         """
         return transformer.canonicalize(config, mlir_code)
 
+    # Register MLIR analysis tools
+    @mcp.tool()
+    def count_operations(mlir_code: str) -> dict[str, Any]:
+        """Count operations by type in MLIR code.
+
+        Args:
+            mlir_code: MLIR code as string.
+
+        Returns:
+            Dictionary with operation counts.
+        """
+        return analyzer.count_operations(config, mlir_code)
+
+    @mcp.tool()
+    def extract_function(mlir_code: str, function_name: str) -> dict[str, Any]:
+        """Extract a specific function from MLIR module.
+
+        Args:
+            mlir_code: MLIR code as string.
+            function_name: Name of function to extract.
+
+        Returns:
+            Dictionary with extracted function code.
+        """
+        return analyzer.extract_function(config, mlir_code, function_name)
+
+    @mcp.tool()
+    def get_operation_operands(
+        mlir_code: str, op_filter: str | None = None
+    ) -> dict[str, Any]:
+        """Get operands of operations.
+
+        Args:
+            mlir_code: MLIR code as string.
+            op_filter: Optional operation name filter.
+
+        Returns:
+            Dictionary with operation operand information.
+        """
+        return analyzer.get_operation_operands(config, mlir_code, op_filter)
+
     logger.info("MLIR MCP Server created successfully")
     logger.info(
         "Registered tools: ping, toolchain_info, "
         "parse_mlir, validate_mlir, get_module_info, "
         "create_function, create_operation, generate_from_template, list_templates, "
-        "apply_pass, apply_pass_pipeline, canonicalize"
+        "apply_pass, apply_pass_pipeline, canonicalize, "
+        "count_operations, extract_function, get_operation_operands"
     )
 
     return mcp

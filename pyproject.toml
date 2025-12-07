@@ -29,6 +29,7 @@ dependencies = [
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     "numpy>=1.23.0",  # Required for MLIR Python bindings
+    "PyYAML>=6.0.0",  # Required for MLIR linalg dialect Python bindings
 ]
 
 [project.optional-dependencies]
