@@ -15,6 +15,11 @@ from .utils import setup_mlir_environment
 def setup_mlir() -> None:
     """Initialize MLIR configuration to set up Python paths."""
     setup_mlir_environment()
+    # Skip all tests in this module if MLIR bindings aren't available
+    try:
+        import mlir  # noqa: F401
+    except ImportError:
+        pytest.skip("MLIR Python bindings not available", allow_module_level=True)
 
 
 class TestBuildFunction:
