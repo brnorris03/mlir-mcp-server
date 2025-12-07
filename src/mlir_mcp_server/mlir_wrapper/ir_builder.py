@@ -76,8 +76,10 @@ def build_function(
                     body_builder(func_op.entry_block.arguments)
             else:
                 # Create empty body with return
+                # TODO: Support generating function bodies with actual operations
+                # Current implementation creates minimal empty function suitable for
+                # skeleton generation. For full code generation, use body_builder callback.
                 with ir.InsertionPoint(func_op.add_entry_block()):
-                    # Just create empty return for now
                     func.ReturnOp([])
 
         return str(module)
@@ -91,6 +93,10 @@ def build_operation(
 ) -> str:
     """Build a standalone MLIR operation.
 
+    Note: This is a simplified textual representation generator. For production use
+    with actual MLIR compilation, operations should be constructed using MLIR Python
+    bindings within a proper module context with SSA value management.
+
     Args:
         op_name: Operation name (e.g., "arith.addi").
         operands: List of operand SSA value names.
@@ -98,19 +104,24 @@ def build_operation(
         attributes: Optional dictionary of operation attributes.
 
     Returns:
-        Generated MLIR operation as a string.
+        Generated MLIR operation as a string (textual representation).
 
     Raises:
         ImportError: If MLIR Python bindings are not available.
+
+    TODO: Implement proper operation construction using MLIR Python bindings
+    for operations that need to be compiled or transformed. This would require:
+    - Module context management
+    - SSA value tracking
+    - Insertion point handling
+    See: https://mlir.llvm.org/docs/Bindings/Python/
     """
     try:
         from mlir import ir
     except ImportError as e:
         raise ImportError(f"MLIR Python bindings not available: {e}")
 
-    # Build a simple representation
-    # For a more complete implementation, we would need to actually construct
-    # the operation in a module context
+    # Build textual representation (suitable for templates and simple generation)
     attr_str = ""
     if attributes:
         attr_parts = [f"{k} = {v}" for k, v in attributes.items()]
