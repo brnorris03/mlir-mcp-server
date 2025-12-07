@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  LLVM_VERSION: "19.1.7"
+
 jobs:
   test:
     name: Test on ${{ matrix.os }}
@@ -44,13 +47,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /opt/mlir-toolchain
-          key: ${{ runner.os }}-mlir-llvm-19.1.7-python-${{ matrix.python-version }}
+          key: ${{ runner.os }}-mlir-llvm-${{ env.LLVM_VERSION }}-python-${{ matrix.python-version }}
 
       - name: Build MLIR toolchain
         if: steps.cache-mlir.outputs.cache-hit != 'true'
         run: |
           # Clone LLVM (shallow clone for speed)
-          git clone --depth 1 --branch llvmorg-19.1.7 https://github.com/llvm/llvm-project.git
+          git clone --depth 1 --branch llvmorg-${{ env.LLVM_VERSION }} https://github.com/llvm/llvm-project.git
           cd llvm-project
 
           # Configure minimal MLIR build
