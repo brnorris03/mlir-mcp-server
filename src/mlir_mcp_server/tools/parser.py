@@ -8,7 +8,7 @@ import logging
 from typing import Any
 
 from ..config import MLIRConfig
-from ..utils.error_handling import MLIRError, parse_mlir_diagnostic
+from ..utils.error_handling import parse_mlir_diagnostic
 
 logger = logging.getLogger(__name__)
 

@@ -22,7 +22,11 @@ def build_function(
         name: Function name.
         arg_types: List of argument type strings (e.g., ["i32", "f64"]).
         result_types: List of result type strings.
-        body_builder: Optional callable to build function body.
+        body_builder: Optional callable that takes a list of MLIR function entry block
+            arguments and builds the function body using MLIR Python IR builders.
+            If provided, called with the function's entry block arguments to construct
+            the body. Otherwise, an empty body with return is generated.
+            Signature: body_builder(arguments: list) -> None.
 
     Returns:
         Generated MLIR function as a string.
@@ -147,7 +151,7 @@ def build_module_from_operations(operations: list[str]) -> str:
             for op_str in operations:
                 # Parse the operation string
                 try:
-                    parsed = ir.Operation.parse(op_str)
+                    ir.Operation.parse(op_str)
                 except Exception as e:
                     logger.warning(f"Failed to parse operation: {op_str}: {e}")
                     continue

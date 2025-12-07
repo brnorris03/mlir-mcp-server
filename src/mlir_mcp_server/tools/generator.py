@@ -215,7 +215,7 @@ def generate_from_template(
                 "success": False,
                 "errors": [
                     {
-                        "message": f"Missing template parameter: {e}",
+                        "message": f"Template parameter not provided: {e}",
                         "severity": "error",
                     }
                 ],

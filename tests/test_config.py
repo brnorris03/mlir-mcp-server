@@ -1,6 +1,5 @@
 """Tests for MLIR configuration module."""
 
-import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -12,7 +11,9 @@ from mlir_mcp_server.config import MLIRConfig, auto_detect_mlir_toolchain
 class TestAutoDetection:
     """Tests for MLIR toolchain auto-detection."""
 
-    def test_auto_detect_finds_toolchain(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_auto_detect_finds_toolchain(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test that auto-detection finds mlir-opt in common locations."""
         # Clear environment to avoid .env interference
         monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
@@ -51,7 +52,9 @@ class TestMLIRConfig:
         assert config.mlir_opt == toolchain_dir / "mlir-opt"
         assert config.mlir_translate == toolchain_dir / "mlir-translate"
 
-    def test_config_with_env_variable(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_config_with_env_variable(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test configuration from environment variable."""
         toolchain_dir = tmp_path / "bin"
         toolchain_dir.mkdir()
@@ -62,7 +65,9 @@ class TestMLIRConfig:
         config = MLIRConfig()
         assert config.toolchain_path == toolchain_dir
 
-    def test_config_with_auto_detection(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_config_with_auto_detection(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test configuration with auto-detection."""
         # Clear environment and change directory to avoid .env interference
         monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
@@ -78,7 +83,9 @@ class TestMLIRConfig:
             config = MLIRConfig()
             assert config.toolchain_path == toolchain_dir
 
-    def test_config_raises_when_toolchain_not_found(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_config_raises_when_toolchain_not_found(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test that configuration raises error when toolchain not found."""
         # Clear environment and change directory to avoid .env interference
         monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
@@ -118,7 +125,9 @@ class TestMLIRConfig:
         with pytest.raises(RuntimeError, match="Core MLIR tools not found"):
             config.validate_tools()
 
-    def test_validate_tools_missing_optional_tool(self, tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    def test_validate_tools_missing_optional_tool(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """Test that validation warns about missing optional tools."""
         toolchain_dir = tmp_path / "bin"
         toolchain_dir.mkdir()
@@ -140,7 +149,9 @@ class TestMLIRConfig:
         assert "mlir-query not found" in caplog.text
         assert "mlir-runner not found" in caplog.text
 
-    def test_toolchain_path_expansion(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_toolchain_path_expansion(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test that tilde in toolchain path is expanded."""
         toolchain_dir = tmp_path / "bin"
         toolchain_dir.mkdir()

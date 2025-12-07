@@ -18,7 +18,8 @@ The server provides 9 MCP tools for MLIR manipulation:
 **Parsing & Validation:**
 3. `parse_mlir` - Parse MLIR code and extract module information
 4. `validate_mlir` - Validate MLIR syntax and semantics
-5. `get_module_info` - Extract detailed structural information (operations, regions, blocks)
+5. `get_module_info` - Extract detailed structural information (operations,
+   regions, blocks)
 
 **Code Generation:**
 6. `create_function` - Generate MLIR functions with custom signatures
@@ -28,10 +29,14 @@ The server provides 9 MCP tools for MLIR manipulation:
 
 ### Configuration
 
-- **Zero-configuration setup**: Auto-detects MLIR toolchain from common installation locations
-- **Flexible configuration**: Supports `.env` files and environment variables for custom toolchain paths
-- **Simple and extensible**: Minimal configuration with room for future expansion
-- **Relaxed validation**: Works with minimal MLIR installations (core tools only), with graceful fallback for optional tools
+- **Zero-configuration setup**: Auto-detects MLIR toolchain from common
+  installation locations
+- **Flexible configuration**: Supports `.env` files and environment variables
+  for custom toolchain paths
+- **Simple and extensible**: Minimal configuration with room for future
+  expansion
+- **Relaxed validation**: Works with minimal MLIR installations (core tools
+  only), with graceful fallback for optional tools
 
 ## Installation
 
@@ -41,7 +46,8 @@ The server provides 9 MCP tools for MLIR manipulation:
 - MLIR toolchain installed (from LLVM project or custom build)
 - MLIR Python bindings (optional, but required for parsing tools)
 
-**Important**: Use the same Python version as your MLIR Python bindings. Check by examining the extension modules:
+**Important**: Use the same Python version as your MLIR Python bindings. Check
+by examining the extension modules:
 
 ```bash
 ls /path/to/mlir/python_packages/mlir_core/mlir/_mlir_libs/
@@ -73,7 +79,9 @@ pip install -e ".[dev]"
 
 ### MLIR Python Bindings Setup
 
-**Automatic Setup (Recommended)**: Use the `MLIR_INSTALLATIONS` configuration option (see Configuration section below). The server will automatically configure PYTHONPATH and library paths for you!
+**Automatic Setup (Recommended)**: Use the `MLIR_INSTALLATIONS` configuration
+option (see Configuration section below). The server will automatically
+configure PYTHONPATH and library paths for you!
 
 **Manual Setup** (if needed):
 
@@ -123,7 +131,8 @@ python -m mlir_mcp_server
 
 ### Multiple MLIR Installations
 
-For multiple MLIR projects (e.g., main LLVM + custom dialects), use `MLIR_INSTALLATIONS`:
+For multiple MLIR projects (e.g., main LLVM + custom dialects), use
+`MLIR_INSTALLATIONS`:
 
 ```bash
 # Automatically configures PYTHONPATH, library paths, and tools
@@ -139,7 +148,8 @@ Each installation root should contain:
 The server automatically:
 - Searches all bin directories for tools
 - Adds all Python bindings to sys.path
-- Sets platform-specific library paths (DYLD_LIBRARY_PATH on macOS, LD_LIBRARY_PATH on Linux)
+- Sets platform-specific library paths (DYLD_LIBRARY_PATH on macOS,
+  LD_LIBRARY_PATH on Linux)
 
 ### Configuration File (.env)
 
@@ -184,8 +194,8 @@ The server resolves the toolchain path using this priority (highest to lowest):
 Add to your Claude Desktop configuration file:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-**Linux**: `~/.config/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json` **Linux**:
+`~/.config/Claude/claude_desktop_config.json`
 
 ```json
 {
@@ -201,7 +211,8 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-**Note**: On Windows, use forward slashes or escaped backslashes in paths (e.g., `"C:/LLVM/bin"` or `"C:\\LLVM\\bin"`).
+**Note**: On Windows, use forward slashes or escaped backslashes in paths (e.g.,
+`"C:/LLVM/bin"` or `"C:\\LLVM\\bin"`).
 
 If you omit `MLIR_TOOLCHAIN_PATH`, the server will auto-detect the toolchain.
 
@@ -249,8 +260,8 @@ mypy src
 
 The server validates the MLIR toolchain at startup:
 
-- **Core tools** (required): `mlir-opt`, `mlir-translate`
-- **Optional tools**: `mlir-reduce`, `mlir-query`, `mlir-runner`
+- Core tools (required): `mlir-opt`, `mlir-translate`
+- Optional tools: `mlir-reduce`, `mlir-query`, `mlir-runner`
 
 If core tools are missing, the server exits with an error. If optional tools are
 missing, warnings are logged and corresponding MCP tools will be disabled when
@@ -260,14 +271,15 @@ implemented.
 
 This project is in active development. Currently implemented:
 
-- ✅ Configuration system with auto-detection
-- ✅ Basic MCP server skeleton
-- ✅ Toolchain validation
-- ✅ Health check tools
+- Configuration system with auto-detection
+- Multiple MLIR installations support
+- Automatic Python bindings and library path setup
+- MCP server with 9 tools
+- MLIR parsing tools (parse, validate, get module info)
+- MLIR generation tools (create functions, operations, templates)
+- Comprehensive test suite (47 tests, 71% coverage)
 
 Coming soon:
-- MLIR parsing tools
-- MLIR generation tools
 - Transformation and optimization tools
 - Analysis and query tools
 - Resource providers for dialect documentation

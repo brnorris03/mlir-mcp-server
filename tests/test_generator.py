@@ -169,7 +169,7 @@ class TestGenerateFromTemplate:
 
         assert result["success"] is False
         assert "errors" in result
-        assert "Missing template parameter" in result["errors"][0]["message"]
+        assert "Template parameter not provided" in result["errors"][0]["message"]
 
 
 class TestListTemplates:
