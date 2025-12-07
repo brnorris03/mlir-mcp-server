@@ -114,15 +114,18 @@ def build_operation(
     - Module context management
     - SSA value tracking
     - Insertion point handling
-    See: https://mlir.llvm.org/docs/Bindings/Python/
-    """
+    # TODO: This is a stub implementation. For a more complete implementation,
+    # we would need to actually construct the operation in a module context
+    # using the MLIR Python bindings, handle SSA values, and manage insertion points.
+    # See: https://mlir.llvm.org/docs/Bindings/Python/
+    logger.warning("build_operation is a stub and does not construct real MLIR operations. "
+                   "A complete implementation should use MLIR Python bindings to build the operation in a module context.")
     try:
         from mlir import ir
     except ImportError as e:
         raise ImportError(f"MLIR Python bindings not available: {e}")
 
-    # Build textual representation (suitable for templates and simple generation)
-    attr_str = ""
+    # Build a simple representation
     if attributes:
         attr_parts = [f"{k} = {v}" for k, v in attributes.items()]
         attr_str = " {" + ", ".join(attr_parts) + "}"
