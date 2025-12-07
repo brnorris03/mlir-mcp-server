@@ -12,15 +12,19 @@ from mlir_mcp_server.tools.generator import (
     list_templates,
 )
 
+from .utils import create_mock_toolchain, is_mlir_available, setup_mlir_environment
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_mlir() -> None:
+    """Initialize MLIR configuration to set up Python paths."""
+    setup_mlir_environment()
+
 
 @pytest.fixture
-def config(tmp_path: Path) -> MLIRConfig:
+def config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> MLIRConfig:
     """Create a test configuration with mock toolchain."""
-    toolchain_dir = tmp_path / "bin"
-    toolchain_dir.mkdir()
-    (toolchain_dir / "mlir-opt").touch()
-    (toolchain_dir / "mlir-translate").touch()
-    return MLIRConfig(toolchain_path=str(toolchain_dir))
+    return create_mock_toolchain(tmp_path, monkeypatch)
 
 
 class TestCreateFunction:
@@ -35,10 +39,16 @@ class TestCreateFunction:
             result_types=["i32"],
         )
 
-        assert result["success"] is True
-        assert "mlir_code" in result
-        assert "test_func" in result["mlir_code"]
-        assert result["function_name"] == "test_func"
+        if is_mlir_available():
+            assert result["success"] is True
+            assert "mlir_code" in result
+            assert "test_func" in result["mlir_code"]
+            assert result["function_name"] == "test_func"
+        else:
+            # Without MLIR bindings, should return error
+            assert result["success"] is False
+            assert "errors" in result
+            assert "MLIR Python bindings not available" in result["errors"][0]["message"]
 
     def test_create_function_no_args(self, config: MLIRConfig) -> None:
         """Test creating a function with no arguments."""
@@ -49,8 +59,11 @@ class TestCreateFunction:
             result_types=["i64"],
         )
 
-        assert result["success"] is True
-        assert "no_args" in result["mlir_code"]
+        if is_mlir_available():
+            assert result["success"] is True
+            assert "no_args" in result["mlir_code"]
+        else:
+            assert result["success"] is False
 
     def test_create_function_multiple_results(self, config: MLIRConfig) -> None:
         """Test creating a function with multiple results."""
@@ -61,8 +74,11 @@ class TestCreateFunction:
             result_types=["i32", "i32"],
         )
 
-        assert result["success"] is True
-        assert "multi_result" in result["mlir_code"]
+        if is_mlir_available():
+            assert result["success"] is True
+            assert "multi_result" in result["mlir_code"]
+        else:
+            assert result["success"] is False
 
 
 class TestCreateOperation:
@@ -77,10 +93,13 @@ class TestCreateOperation:
             result_types=["i32"],
         )
 
-        assert result["success"] is True
-        assert "mlir_code" in result
-        assert "arith.addi" in result["mlir_code"]
-        assert result["operation"] == "arith.addi"
+        if is_mlir_available():
+            assert result["success"] is True
+            assert "mlir_code" in result
+            assert "arith.addi" in result["mlir_code"]
+            assert result["operation"] == "arith.addi"
+        else:
+            assert result["success"] is False
 
     def test_create_operation_with_attributes(self, config: MLIRConfig) -> None:
         """Test creating an operation with attributes."""
@@ -92,8 +111,11 @@ class TestCreateOperation:
             attributes={"value": "42"},
         )
 
-        assert result["success"] is True
-        assert "arith.constant" in result["mlir_code"]
+        if is_mlir_available():
+            assert result["success"] is True
+            assert "arith.constant" in result["mlir_code"]
+        else:
+            assert result["success"] is False
 
 
 class TestGenerateFromTemplate:

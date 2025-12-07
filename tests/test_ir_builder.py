@@ -2,22 +2,19 @@
 
 import pytest
 
-from mlir_mcp_server.config import MLIRConfig
 from mlir_mcp_server.mlir_wrapper.ir_builder import (
     build_function,
     build_module_from_operations,
     build_operation,
 )
 
+from .utils import setup_mlir_environment
+
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_mlir() -> None:
     """Initialize MLIR configuration to set up Python paths."""
-    try:
-        # This sets up PYTHONPATH and library paths automatically
-        MLIRConfig()
-    except RuntimeError:
-        pytest.skip("No MLIR installation found")
+    setup_mlir_environment()
 
 
 class TestBuildFunction:

@@ -5,19 +5,13 @@ import pytest
 from mlir_mcp_server.config import MLIRConfig
 from mlir_mcp_server.server import create_server
 
+from .utils import get_real_mlir_config
+
 
 @pytest.fixture
 def config() -> MLIRConfig:
     """Create configuration using real MLIR installation."""
-    try:
-        config = MLIRConfig()
-        if not config.mlir_opt.exists() or not config.mlir_translate.exists():
-            pytest.skip("Real MLIR tools not found")
-        return config
-    except RuntimeError:
-        pytest.skip("No MLIR installation found")
-
-    raise RuntimeError("Unreachable")
+    return get_real_mlir_config()
 
 
 class TestServerCreation:
