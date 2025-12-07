@@ -12,8 +12,12 @@ from mlir_mcp_server.config import MLIRConfig, auto_detect_mlir_toolchain
 class TestAutoDetection:
     """Tests for MLIR toolchain auto-detection."""
 
-    def test_auto_detect_finds_toolchain(self, tmp_path: Path) -> None:
+    def test_auto_detect_finds_toolchain(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that auto-detection finds mlir-opt in common locations."""
+        # Clear environment to avoid .env interference
+        monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
+        monkeypatch.setattr("mlir_mcp_server.config.MLIRConfig.model_config", {"env_file": None})
+
         # Create a fake toolchain directory
         toolchain_dir = tmp_path / "bin"
         toolchain_dir.mkdir()
@@ -58,8 +62,12 @@ class TestMLIRConfig:
         config = MLIRConfig()
         assert config.toolchain_path == toolchain_dir
 
-    def test_config_with_auto_detection(self, tmp_path: Path) -> None:
+    def test_config_with_auto_detection(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test configuration with auto-detection."""
+        # Clear environment and change directory to avoid .env interference
+        monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
+        monkeypatch.chdir(tmp_path)
+
         toolchain_dir = tmp_path / "bin"
         toolchain_dir.mkdir()
         (toolchain_dir / "mlir-opt").touch()
@@ -70,8 +78,12 @@ class TestMLIRConfig:
             config = MLIRConfig()
             assert config.toolchain_path == toolchain_dir
 
-    def test_config_raises_when_toolchain_not_found(self) -> None:
+    def test_config_raises_when_toolchain_not_found(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that configuration raises error when toolchain not found."""
+        # Clear environment and change directory to avoid .env interference
+        monkeypatch.delenv("MLIR_TOOLCHAIN_PATH", raising=False)
+        monkeypatch.chdir(tmp_path)
+
         with patch("mlir_mcp_server.config.auto_detect_mlir_toolchain", return_value=None):
             with pytest.raises(RuntimeError, match="MLIR toolchain not found"):
                 MLIRConfig()
