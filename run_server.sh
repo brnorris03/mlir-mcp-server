@@ -1,5 +1,6 @@
 #!/bin/bash
 # Helper script to run MLIR MCP Server
+# IMPORTANT: This script requires Bash. Run with: bash run_server.sh
 #
 # NOTE: If you set MLIR_INSTALLATIONS in your .env file, the server will
 # automatically configure PYTHONPATH and library paths. No manual setup needed!

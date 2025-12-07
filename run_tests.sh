@@ -1,5 +1,6 @@
 #!/bin/bash
 # Helper script to run tests
+# IMPORTANT: This script requires Bash. Run with: bash run_tests.sh
 #
 # NOTE: If you set MLIR_INSTALLATIONS in your .env file, the server will
 # automatically configure PYTHONPATH and library paths. No manual setup needed!

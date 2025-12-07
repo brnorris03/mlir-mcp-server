@@ -5,7 +5,7 @@ and errors in a structured way suitable for MCP responses.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -26,8 +26,17 @@ class MLIRError:
     column: Optional[int] = None
     severity: str = "error"
 
-    def to_dict(self) -> dict[str, str | int | None]:
-        """Convert error to dictionary format for JSON serialization."""
+    def to_dict(self) -> dict[str, Any]:
+        """Convert error to dictionary format for JSON serialization.
+
+        Returns:
+            Dictionary with error details. Fields include:
+            - message (str): Error message
+            - location (str | None): Source location
+            - line (int | None): Line number
+            - column (int | None): Column number
+            - severity (str): Error severity level
+        """
         return {
             "message": self.message,
             "location": self.location,
@@ -50,7 +59,7 @@ def parse_mlir_diagnostic(diagnostic_str: str) -> list[MLIRError]:
 
     # Split by lines and parse each diagnostic
     lines = diagnostic_str.strip().split("\n")
-    current_error: Optional[dict[str, str | int | None]] = None
+    current_error: Optional[dict[str, Any]] = None
 
     for line in lines:
         line = line.strip()
@@ -63,12 +72,14 @@ def parse_mlir_diagnostic(diagnostic_str: str) -> list[MLIRError]:
             if len(parts) >= 4:
                 # Save previous error if exists
                 if current_error:
+                    line_val = current_error.get("line")
+                    col_val = current_error.get("column")
                     errors.append(
                         MLIRError(
                             message=str(current_error.get("message", "")),
                             location=str(current_error.get("location")) if current_error.get("location") else None,
-                            line=int(current_error["line"]) if current_error.get("line") else None,
-                            column=int(current_error["column"]) if current_error.get("column") else None,
+                            line=int(line_val) if line_val is not None else None,
+                            column=int(col_val) if col_val is not None else None,
                             severity=str(current_error.get("severity", "error")),
                         )
                     )
@@ -97,12 +108,14 @@ def parse_mlir_diagnostic(diagnostic_str: str) -> list[MLIRError]:
 
     # Add last error
     if current_error:
+        line_val = current_error.get("line")
+        col_val = current_error.get("column")
         errors.append(
             MLIRError(
                 message=str(current_error.get("message", "")),
                 location=str(current_error.get("location")) if current_error.get("location") else None,
-                line=int(current_error["line"]) if current_error.get("line") else None,
-                column=int(current_error["column"]) if current_error.get("column") else None,
+                line=int(line_val) if line_val is not None else None,
+                column=int(col_val) if col_val is not None else None,
                 severity=str(current_error.get("severity", "error")),
             )
         )
