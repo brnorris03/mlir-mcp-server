@@ -42,6 +42,7 @@ The server provides 9 MCP tools for MLIR manipulation:
 
 ### Prerequisites
 
+- bash or compatible shell
 - Python 3.10 or higher
 - MLIR toolchain installed (from LLVM project or custom build)
 - MLIR Python bindings (optional, but required for parsing tools)
