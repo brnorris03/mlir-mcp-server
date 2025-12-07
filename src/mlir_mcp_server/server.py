@@ -120,7 +120,6 @@ def create_server(config: MLIRConfig) -> FastMCP:
         name: str,
         arg_types: list[str],
         result_types: list[str],
-        add_return: bool = True,
     ) -> dict[str, Any]:
         """Generate an MLIR function with specified signature.
 
@@ -128,12 +127,11 @@ def create_server(config: MLIRConfig) -> FastMCP:
             name: Function name.
             arg_types: List of argument type strings (e.g., ["i32", "i64"]).
             result_types: List of result type strings.
-            add_return: Whether to add an empty return statement.
 
         Returns:
             Dictionary with generated MLIR function code.
         """
-        return generator.create_function(config, name, arg_types, result_types, add_return)
+        return generator.create_function(config, name, arg_types, result_types)
 
     @mcp.tool()
     def create_operation(

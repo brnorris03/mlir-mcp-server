@@ -18,7 +18,6 @@ def create_function(
     name: str,
     arg_types: list[str],
     result_types: list[str],
-    add_return: bool = True,
 ) -> dict[str, Any]:
     """Generate an MLIR function with specified signature.
 
@@ -27,7 +26,6 @@ def create_function(
         name: Function name.
         arg_types: List of argument type strings (e.g., ["i32", "i64"]).
         result_types: List of result type strings.
-        add_return: Whether to add an empty return statement.
 
     Returns:
         Dictionary containing:
