@@ -7,14 +7,31 @@ protocol.
 
 ## Features
 
-- **Zero-configuration setup**: Auto-detects MLIR toolchain from common
-  installation locations
-- **Flexible configuration**: Supports `.env` files and environment variables
-  for custom toolchain paths
-- **Simple and extensible**: Minimal configuration with room for future
-  expansion
-- **Relaxed validation**: Works with minimal MLIR installations (core tools
-  only), with graceful fallback for optional tools
+### MCP Tools
+
+The server provides 9 MCP tools for MLIR manipulation:
+
+**Server Management:**
+1. `ping` - Health check endpoint
+2. `toolchain_info` - Get toolchain configuration and tool availability
+
+**Parsing & Validation:**
+3. `parse_mlir` - Parse MLIR code and extract module information
+4. `validate_mlir` - Validate MLIR syntax and semantics
+5. `get_module_info` - Extract detailed structural information (operations, regions, blocks)
+
+**Code Generation:**
+6. `create_function` - Generate MLIR functions with custom signatures
+7. `create_operation` - Generate specific MLIR operations
+8. `generate_from_template` - Generate MLIR from predefined templates
+9. `list_templates` - List available generation templates
+
+### Configuration
+
+- **Zero-configuration setup**: Auto-detects MLIR toolchain from common installation locations
+- **Flexible configuration**: Supports `.env` files and environment variables for custom toolchain paths
+- **Simple and extensible**: Minimal configuration with room for future expansion
+- **Relaxed validation**: Works with minimal MLIR installations (core tools only), with graceful fallback for optional tools
 
 ## Installation
 
