@@ -5,7 +5,7 @@ to simplify MLIR code generation.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ def build_function(
     name: str,
     arg_types: list[str],
     result_types: list[str],
-    body_builder: Optional[Any] = None,
+    body_builder: Any | None = None,
 ) -> str:
     """Build an MLIR function with specified signature.
 
@@ -89,7 +89,7 @@ def build_operation(
     op_name: str,
     operands: list[str],
     result_types: list[str],
-    attributes: Optional[dict[str, Any]] = None,
+    attributes: dict[str, Any] | None = None,
 ) -> str:
     """Build a standalone MLIR operation.
 

@@ -5,7 +5,7 @@ and errors in a structured way suitable for MCP responses.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -21,9 +21,9 @@ class MLIRError:
     """
 
     message: str
-    location: Optional[str] = None
-    line: Optional[int] = None
-    column: Optional[int] = None
+    location: str | None = None
+    line: int | None = None
+    column: int | None = None
     severity: str = "error"
 
     def to_dict(self) -> dict[str, Any]:
@@ -59,7 +59,7 @@ def parse_mlir_diagnostic(diagnostic_str: str) -> list[MLIRError]:
 
     # Split by lines and parse each diagnostic
     lines = diagnostic_str.strip().split("\n")
-    current_error: Optional[dict[str, Any]] = None
+    current_error: dict[str, Any] | None = None
 
     for line in lines:
         line = line.strip()

@@ -5,7 +5,7 @@ using IR builders and templates.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from ..config import MLIRConfig
 from ..mlir_wrapper import ir_builder
@@ -67,9 +67,9 @@ def create_function(
 def create_operation(
     config: MLIRConfig,
     op_name: str,
-    operands: Optional[list[str]] = None,
-    result_types: Optional[list[str]] = None,
-    attributes: Optional[dict[str, Any]] = None,
+    operands: list[str] | None = None,
+    result_types: list[str] | None = None,
+    attributes: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Generate a specific MLIR operation.
 

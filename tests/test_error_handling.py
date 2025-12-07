@@ -1,6 +1,5 @@
 """Tests for MLIR error handling utilities."""
 
-import pytest
 
 from mlir_mcp_server.utils.error_handling import MLIRError, parse_mlir_diagnostic
 

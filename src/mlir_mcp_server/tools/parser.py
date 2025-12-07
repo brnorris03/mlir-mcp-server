@@ -47,7 +47,7 @@ def parse_mlir(config: MLIRConfig, mlir_code: str) -> dict[str, Any]:
             }
 
         # Parse the MLIR code
-        with ir.Context() as ctx:
+        with ir.Context():
             try:
                 module = ir.Module.parse(mlir_code)
 
@@ -141,7 +141,7 @@ def get_module_info(config: MLIRConfig, mlir_code: str) -> dict[str, Any]:
         }
 
     try:
-        with ir.Context() as ctx:
+        with ir.Context():
             module = ir.Module.parse(mlir_code)
 
             operations = []

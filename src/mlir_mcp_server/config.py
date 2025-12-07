@@ -9,7 +9,6 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,8 +31,8 @@ class MLIRInstallation:
     name: str
     root: Path
     tool_prefix: str = "mlir"
-    bin_dir: Optional[Path] = None
-    python_dir: Optional[Path] = None
+    bin_dir: Path | None = None
+    python_dir: Path | None = None
 
     def __post_init__(self) -> None:
         """Initialize derived paths."""
@@ -73,7 +72,7 @@ class MLIRInstallation:
         return result
 
 
-def auto_detect_mlir_toolchain(additional_paths: Optional[list[Path]] = None) -> Optional[Path]:
+def auto_detect_mlir_toolchain(additional_paths: list[Path] | None = None) -> Path | None:
     """Auto-detect MLIR toolchain from common installation locations.
 
     Searches the following locations in order:
@@ -117,8 +116,8 @@ def setup_python_paths(python_paths: list[Path], lib_paths: list[Path]) -> None:
         python_paths: List of paths to MLIR Python packages.
         lib_paths: List of paths to MLIR shared libraries.
     """
-    import sys
     import platform
+    import sys
 
     # Add Python bindings to sys.path and PYTHONPATH
     for path in python_paths:
@@ -183,12 +182,12 @@ class MLIRConfig(BaseSettings):
         extra="ignore",  # Allow extra fields for flexibility
     )
 
-    toolchain_path: Optional[Path] = None
-    installations: Optional[str] = None
+    toolchain_path: Path | None = None
+    installations: str | None = None
 
     @field_validator("toolchain_path", mode="before")
     @classmethod
-    def validate_toolchain_path(cls, v: Optional[str | Path]) -> Optional[Path]:
+    def validate_toolchain_path(cls, v: str | Path | None) -> Path | None:
         """Validate and convert toolchain path to Path object."""
         if v is None:
             return None
@@ -201,7 +200,7 @@ class MLIRConfig(BaseSettings):
         super().__init__(**kwargs)
 
         # Process multiple MLIR installations if provided
-        additional_search_paths: Optional[list[Path]] = None
+        additional_search_paths: list[Path] | None = None
         python_binding_paths: list[Path] = []
         lib_paths: list[Path] = []
 
