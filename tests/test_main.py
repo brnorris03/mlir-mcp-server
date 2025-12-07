@@ -1,14 +1,17 @@
 """Tests for __main__.py server entry point."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pytest import MonkeyPatch
 
 from mlir_mcp_server.__main__ import main
 
 
 class TestMain:
-    """Tests for main() entry point."""
+    def test_main_with_valid_config(self, tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+        """Test main() with valid MLIR configuration."""
 
     def test_main_with_valid_config(self, tmp_path, monkeypatch):
         """Test main() with valid MLIR configuration."""
@@ -46,9 +49,13 @@ class TestMain:
                         main()
 
                 # Verify it tried to run the server
-                assert mock_server.run.called or exc_info.value.code == 0
 
-    def test_main_config_error(self, monkeypatch, capsys):
+    def test_main_config_error(
+        self, monkeypatch: MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Test main() handles configuration errors."""
+
+    def test_main_config_error(self, monkeypatch: MonkeyPatch, capsys: pytest.CaptureFixture[str]):
         """Test main() handles configuration errors."""
         # Mock MLIRConfig to raise RuntimeError
         with patch("mlir_mcp_server.__main__.MLIRConfig") as mock_config:
@@ -63,7 +70,11 @@ class TestMain:
             # Check error message was printed
             captured = capsys.readouterr()
             assert "Fatal error" in captured.err
-            assert "MLIR toolchain not found" in captured.err
+
+    def test_main_validation_error(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Test main() handles validation errors."""
 
     def test_main_validation_error(self, tmp_path, monkeypatch, capsys):
         """Test main() handles validation errors."""

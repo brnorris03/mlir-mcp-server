@@ -220,3 +220,67 @@ class TestListTemplates:
         assert "constant" in template_names
         assert "if_else" in template_names
         assert "for_loop" in template_names
+
+
+class TestGeneratorEdgeCases:
+    """Tests for edge cases and error handling in generator."""
+
+    def test_create_operation_with_none_values(self, config: MLIRConfig) -> None:
+        """Test creating operation with None operands and attributes."""
+        result = create_operation(
+            config=config,
+            op_name="arith.constant",
+            operands=None,
+            result_types=None,
+            attributes=None,
+        )
+
+        if is_mlir_available():
+            assert result["success"] is True
+        else:
+            assert result["success"] is False
+
+    def test_generate_mul_function_template(self, config: MLIRConfig) -> None:
+        """Test generating multiplication function template."""
+        result = generate_from_template(
+            config=config,
+            template_name="mul_function",
+            params={"type": "i64"},
+        )
+
+        assert result["success"] is True
+        assert "arith.muli" in result["mlir_code"]
+        assert "func.func @mul" in result["mlir_code"]
+
+    def test_generate_simple_function_template(self, config: MLIRConfig) -> None:
+        """Test generating simple_function template."""
+        result = generate_from_template(
+            config=config,
+            template_name="simple_function",
+            params={
+                "name": "custom",
+                "args": "%arg0: i32",
+                "results": "i32",
+                "return_vals": "%arg0",
+            },
+        )
+
+        assert result["success"] is True
+        assert "func.func @custom" in result["mlir_code"]
+
+    def test_list_templates_has_all_templates(self, config: MLIRConfig) -> None:
+        """Test that all six templates are listed."""
+        result = list_templates(config)
+
+        assert result["count"] == 6
+        template_names = [t["name"] for t in result["templates"]]
+        expected = [
+            "simple_function",
+            "add_function",
+            "mul_function",
+            "constant",
+            "if_else",
+            "for_loop",
+        ]
+        for expected_name in expected:
+            assert expected_name in template_names

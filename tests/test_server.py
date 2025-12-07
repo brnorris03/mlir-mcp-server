@@ -65,3 +65,4 @@ class TestServerTools:
             assert expected in tool_names, f"Tool {expected} not registered"
 
         assert len(tools) == 15
+

@@ -143,3 +143,100 @@ class TestGetOperationOperands:
 
         assert result["success"] is True
         assert len(result["operations"]) > 5  # Complex has many operations
+
+
+class TestAnalyzerEdgeCases:
+    """Tests for edge cases and error handling in analyzer."""
+
+    def test_count_operations_with_invalid_mlir(self, config: MLIRConfig) -> None:
+        """Test counting operations with invalid MLIR."""
+        result = count_operations(config, "this is not valid MLIR")
+
+        assert result["success"] is False
+        assert "errors" in result
+
+    def test_extract_function_with_invalid_mlir(self, config: MLIRConfig) -> None:
+        """Test extracting function from invalid MLIR."""
+        result = extract_function(config, "invalid MLIR", "test")
+
+        assert result["success"] is False
+        assert "errors" in result
+
+    def test_get_operation_operands_with_invalid_mlir(self, config: MLIRConfig) -> None:
+        """Test getting operands from invalid MLIR."""
+        result = get_operation_operands(config, "invalid MLIR")
+
+        assert result["success"] is False
+        assert "errors" in result
+
+    def test_get_operation_operands_with_no_filter(
+        self, config: MLIRConfig, simple_mlir: str
+    ) -> None:
+        """Test getting operands with None filter."""
+        result = get_operation_operands(config, simple_mlir, None)
+
+        assert result["success"] is True
+        assert "filter" not in result or result["filter"] is None
+
+    def test_count_operations_includes_nested_operations(
+        self, config: MLIRConfig
+    ) -> None:
+        """Test that nested operations are counted."""
+        mlir_code = """
+module {
+  func.func @nested() -> i32 {
+    %c0 = arith.constant 0 : i32
+    %c1 = arith.constant 1 : i32
+    %sum = arith.addi %c0, %c1 : i32
+    func.return %sum : i32
+  }
+}
+"""
+        result = count_operations(config, mlir_code)
+
+        assert result["success"] is True
+        # Should count func.func, constants, addi, and return
+        assert result["total_operations"] >= 4
+
+    def test_extract_function_with_multiple_functions(
+        self, config: MLIRConfig
+    ) -> None:
+        """Test extracting specific function when multiple exist."""
+        mlir_code = """
+module {
+  func.func @first() -> i32 {
+    %c1 = arith.constant 1 : i32
+    func.return %c1 : i32
+  }
+  func.func @second() -> i32 {
+    %c2 = arith.constant 2 : i32
+    func.return %c2 : i32
+  }
+}
+"""
+        result = extract_function(config, mlir_code, "second")
+
+        assert result["success"] is True
+        assert "@second" in result["function_code"]
+        assert "@first" not in result["function_code"]
+
+    def test_get_operation_operands_with_specific_filter(
+        self, config: MLIRConfig
+    ) -> None:
+        """Test filtering operations by specific name."""
+        mlir_code = """
+module {
+  func.func @test() -> i32 {
+    %c1 = arith.constant 1 : i32
+    %c2 = arith.constant 2 : i32
+    %sum = arith.addi %c1, %c2 : i32
+    func.return %sum : i32
+  }
+}
+"""
+        result = get_operation_operands(config, mlir_code, "arith.constant")
+
+        assert result["success"] is True
+        # Should only return constant operations
+        for op in result["operations"]:
+            assert "arith.constant" in op["name"]
