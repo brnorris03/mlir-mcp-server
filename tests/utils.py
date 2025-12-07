@@ -1,6 +1,5 @@
 """Shared test utilities and helpers."""
 
-import os
 from pathlib import Path
 
 import pytest
@@ -28,13 +27,13 @@ def setup_mlir_environment() -> None:
     This should be called in module-scoped autouse fixtures to ensure
     PYTHONPATH and library paths are configured before tests run.
 
-    In CI environments, this is skipped to avoid requiring MLIR installation.
+    Attempts to load MLIR configuration. If it fails, tests will handle
+    gracefully by skipping when MLIR is not available.
     """
-    if not os.getenv("CI"):  # Only try to load MLIR locally
-        try:
-            MLIRConfig()
-        except RuntimeError:
-            pass  # No MLIR installation, tests will handle gracefully
+    try:
+        MLIRConfig()
+    except RuntimeError:
+        pass  # No MLIR installation, tests will handle gracefully
 
 
 def create_mock_toolchain(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> MLIRConfig:

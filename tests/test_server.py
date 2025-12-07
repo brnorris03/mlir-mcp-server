@@ -59,10 +59,13 @@ class TestServerTools:
             "count_operations",
             "extract_function",
             "get_operation_operands",
+            "translate_to_llvmir",
+            "translate_from_llvmir",
+            "get_translation_info",
         ]
 
         for expected in expected_tools:
             assert expected in tool_names, f"Tool {expected} not registered"
 
-        assert len(tools) == 15
+        assert len(tools) == 18
 

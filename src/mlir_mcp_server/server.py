@@ -10,7 +10,7 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 
 from .config import MLIRConfig
-from .tools import analyzer, generator, parser, transformer
+from .tools import analyzer, generator, parser, transformer, translator
 
 logger = logging.getLogger(__name__)
 
@@ -255,13 +255,48 @@ def create_server(config: MLIRConfig) -> FastMCP:
         """
         return analyzer.get_operation_operands(config, mlir_code, op_filter)
 
+    # Register MLIR translation tools
+    @mcp.tool()
+    def translate_to_llvmir(mlir_code: str) -> dict[str, Any]:
+        """Translate MLIR code to LLVM IR.
+
+        Args:
+            mlir_code: MLIR code as string (must use LLVM dialect).
+
+        Returns:
+            Dictionary with LLVM IR code or errors.
+        """
+        return translator.translate_to_llvmir(config, mlir_code)
+
+    @mcp.tool()
+    def translate_from_llvmir(llvm_ir: str) -> dict[str, Any]:
+        """Translate LLVM IR to MLIR (LLVM dialect).
+
+        Args:
+            llvm_ir: LLVM IR code as string.
+
+        Returns:
+            Dictionary with MLIR code or errors.
+        """
+        return translator.translate_from_llvmir(config, llvm_ir)
+
+    @mcp.tool()
+    def get_translation_info() -> dict[str, Any]:
+        """Get information about available translation capabilities.
+
+        Returns:
+            Dictionary with translation tool availability and supported formats.
+        """
+        return translator.get_translation_info(config)
+
     logger.info("MLIR MCP Server created successfully")
     logger.info(
         "Registered tools: ping, toolchain_info, "
         "parse_mlir, validate_mlir, get_module_info, "
         "create_function, create_operation, generate_from_template, list_templates, "
         "apply_pass, apply_pass_pipeline, canonicalize, "
-        "count_operations, extract_function, get_operation_operands"
+        "count_operations, extract_function, get_operation_operands, "
+        "translate_to_llvmir, translate_from_llvmir, get_translation_info"
     )
 
     return mcp
