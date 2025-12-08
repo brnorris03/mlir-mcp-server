@@ -272,18 +272,20 @@ implemented.
 
 This project is in active development. Currently implemented:
 
-- Configuration system with auto-detection
-- Multiple MLIR installations support
-- Automatic Python bindings and library path setup
-- MCP server with 9 tools
-- MLIR parsing tools (parse, validate, get module info)
-- MLIR generation tools (create functions, operations, templates)
-- Comprehensive test suite (47 tests, 71% coverage)
+- ✅ Configuration system with auto-detection
+- ✅ Multiple MLIR installations support
+- ✅ Automatic Python bindings and library path setup
+- ✅ MCP server with 18 tools
+- ✅ MLIR parsing tools (parse, validate, get module info)
+- ✅ MLIR generation tools (create functions, operations, templates)
+- ✅ MLIR transformation tools (apply passes, canonicalize)
+- ✅ MLIR analysis tools (count operations, extract functions, analyze operands)
+- ✅ MLIR translation tools (MLIR ↔ LLVM IR)
+- ✅ Comprehensive test suite (137 tests, 87% coverage)
 
 Coming soon:
-- Transformation and optimization tools
-- Analysis and query tools
 - Resource providers for dialect documentation
+- Workflow prompts for common MLIR tasks
 
 ## Contributing
 

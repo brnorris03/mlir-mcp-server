@@ -44,7 +44,7 @@ class TestMain:
                 mock_config_cls.return_value = mock_config
 
                 # Run main - should exit normally via mocked run()
-                with pytest.raises(SystemExit) as exc_info:
+                with pytest.raises(SystemExit):
                     with patch.object(mock_server, "run", side_effect=SystemExit(0)):
                         main()
 

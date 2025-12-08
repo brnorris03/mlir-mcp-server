@@ -7,7 +7,6 @@ like mlir-opt, mlir-translate, mlir-reduce, etc.
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any
 
 from ..config import MLIRConfig
 

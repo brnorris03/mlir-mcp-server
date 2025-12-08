@@ -156,8 +156,8 @@ class TestMultipleInstallations:
         python_dir = root / "python_packages" / "mlir_core"
         python_dir.mkdir(parents=True)
 
-        # Configure
-        config = MLIRConfig(installations=str(root))
+        # Configure (side effect: adds to sys.path)
+        _ = MLIRConfig(installations=str(root))
 
         # Verify Python path was added
         assert str(python_dir) in sys.path

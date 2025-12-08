@@ -116,10 +116,10 @@ def build_operation(
     - Insertion point handling
     See: https://mlir.llvm.org/docs/Bindings/Python/
     """
-    try:
-        from mlir import ir
-    except ImportError as e:
-        raise ImportError(f"MLIR Python bindings not available: {e}")
+    import importlib.util
+
+    if importlib.util.find_spec("mlir") is None:
+        raise ImportError("MLIR Python bindings not available")
 
     # Build textual representation (suitable for templates and simple generation)
     attr_str = ""
