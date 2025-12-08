@@ -1,0 +1,6 @@
+# CODEOWNERS file for mlir-mcp-server
+# This file defines who owns and should review code in this repository.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repository
+* @brnorris03

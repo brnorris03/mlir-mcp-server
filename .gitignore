@@ -2,6 +2,8 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.log
+/_*
 
 # C extensions
 *.so
@@ -25,6 +27,23 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Virtual environments
+venv/
+venv*/
+env/
+ENV/
+
+# Local configuration
+.env
+
+# IDE settings
+.vscode/
+
+# Planning and development documents
+IMPLEMENTATION_PLAN.md
+docs/phase2_summary.md
+docs/mlir_python_bindings.md
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

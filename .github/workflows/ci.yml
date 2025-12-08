@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  LLVM_VERSION: "19.1.7"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 360  # Allow time for MLIR build on cache miss
+
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.11']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create Python virtual environment and install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install cmake ninja pybind11 nanobind  # Build dependencies
+          pip install -e ".[dev]"  # Install project with dev dependencies
+
+      - name: Create toolchain directory
+        run: |
+          sudo mkdir -p /opt/mlir-toolchain
+          sudo chown -R $USER /opt/mlir-toolchain
+
+      - name: Cache MLIR toolchain
+        id: cache-mlir
+        uses: actions/cache@v4
+        with:
+          path: /opt/mlir-toolchain
+          key: ${{ runner.os }}-mlir-llvm-${{ env.LLVM_VERSION }}-python-${{ matrix.python-version }}
+
+      - name: Build MLIR toolchain
+        if: steps.cache-mlir.outputs.cache-hit != 'true'
+        run: |
+          source venv/bin/activate
+
+          # Download LLVM source tarball
+          curl -L -o llvm-project.tar.gz https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-${{ env.LLVM_VERSION }}.tar.gz
+          tar -xzf llvm-project.tar.gz
+          cd llvm-project-llvmorg-${{ env.LLVM_VERSION }}
+
+          # Configure minimal MLIR build with venv Python
+          cmake -G Ninja llvm \
+            -B build \
+            -DCMAKE_INSTALL_PREFIX=/opt/mlir-toolchain \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_ENABLE_PROJECTS=mlir \
+            -DLLVM_ENABLE_ASSERTIONS=ON \
+            -DLLVM_TARGETS_TO_BUILD="Native" \
+            -DMLIR_ENABLE_BINDINGS_PYTHON=ON \
+            -DPython3_EXECUTABLE=$(which python) \
+            -DBUILD_SHARED_LIBS=OFF
+
+          # Build essential targets only
+          cmake --build build
+
+          # Install
+          cmake --install build
+
+      - name: Run MLIR tests
+        if: steps.cache-mlir.outputs.cache-hit != 'true'
+        run: |
+          source venv/bin/activate
+          cd llvm-project-llvmorg-${{ env.LLVM_VERSION }}
+          cmake --build build --target check-mlir
+
+      - name: Verify MLIR installation
+        run: |
+          source venv/bin/activate
+          ls -la /opt/mlir-toolchain/bin/
+          /opt/mlir-toolchain/bin/mlir-opt --version
+          ls -la /opt/mlir-toolchain/python_packages/ || true
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          # Use MLIR_INSTALLATIONS to auto-configure paths
+          export MLIR_INSTALLATIONS=/opt/mlir-toolchain
+          pytest --cov=src/mlir_mcp_server --cov-report=xml --cov-report=term -v
+
+      - name: Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest'
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+        if: matrix.os == 'ubuntu-latest'
